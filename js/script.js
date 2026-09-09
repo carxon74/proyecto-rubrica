@@ -1,5 +1,5 @@
 (function(){
-  var state = { verificado:false, correo:'', codigo:'', programaCodigo:'', programaNombre:'' };
+  var state = { verificado:false, correo:'', codigo:'', programaCodigo:'', programaNombre:'', semestre:'' };
   var submissions = [];
   var folioSeq = 1;
 
@@ -23,6 +23,7 @@
     var correo = document.getElementById('correo').value.trim();
     var codigo = document.getElementById('codigo').value.trim();
     var programa = document.getElementById('programa').value;
+    var semestre = document.getElementById('semestre').value;
     var declara = document.getElementById('declaracion').checked;
 
     var correoOk = /^[a-zA-Z0-9._%+-]+@cuc\.edu\.co$/i.test(correo);
@@ -31,6 +32,7 @@
     if(!correoOk){ showError(errorVerificacion, 'Este buzón es exclusivo para el correo institucional @cuc.edu.co.'); return; }
     if(!codigoOk){ showError(errorVerificacion, 'Ingresa un código estudiantil válido (solo números).'); return; }
     if(!programa){ showError(errorVerificacion, 'Selecciona tu programa académico.'); return; }
+    if(!semestre){ showError(errorVerificacion, 'Selecciona tu semestre.'); return; }
     if(!declara){ showError(errorVerificacion, 'Debes confirmar que eres estudiante activo de Ingeniería para continuar.'); return; }
 
     state.verificado = true;
@@ -38,6 +40,7 @@
     state.codigo = codigo;
     state.programaCodigo = programa;
     state.programaNombre = programNames[programa];
+    state.semestre = semestre;
 
     document.getElementById('programaVerificado').textContent = state.programaNombre;
     formVerificacion.style.display = 'none';
@@ -78,6 +81,7 @@
       folio: folio,
       fecha: new Date().toLocaleString('es-CO'),
       programa: state.programaNombre,
+      semestre: state.semestre,
       categoria: categoria,
       prioridad: prioridadEl.value,
       mensaje: mensaje,
@@ -121,9 +125,9 @@
     }
     conteo.textContent = submissions.length + (submissions.length === 1 ? ' sugerencia registrada' : ' sugerencias registradas');
     var rows = submissions.map(function(r){
-      return '<tr><td>'+r.folio+'</td><td>'+r.programa+'</td><td>'+r.categoria+'</td><td>'+r.prioridad+'</td><td>'+r.fecha+'</td></tr>';
+      return '<tr><td>'+r.folio+'</td><td>'+r.programa+'</td><td>'+r.semestre+'</td><td>'+r.categoria+'</td><td>'+r.prioridad+'</td><td>'+r.fecha+'</td></tr>';
     }).join('');
-    contenido.innerHTML = '<table class="log"><thead><tr><th>Folio</th><th>Programa</th><th>Categoría</th><th>Prioridad</th><th>Fecha</th></tr></thead><tbody>'+rows+'</tbody></table>';
+    contenido.innerHTML = '<table class="log"><thead><tr><th>Folio</th><th>Programa</th><th>Semestre</th><th>Categoría</th><th>Prioridad</th><th>Fecha</th></tr></thead><tbody>'+rows+'</tbody></table>';
   }
 
   function descargar(nombreArchivo, contenido, tipo){
@@ -137,11 +141,11 @@
 
   document.getElementById('btnCSV').addEventListener('click', function(){
     if(submissions.length === 0) return;
-    var header = 'Folio,Programa,Categoria,Prioridad,Fecha,Anonimo,Nombre,Mensaje\n';
+    var header = 'Folio,Programa,Semestre,Categoria,Prioridad,Fecha,Anonimo,Nombre,Mensaje\n';
     var rows = submissions.map(function(r){
       var mensajeEsc = '"' + r.mensaje.replace(/"/g,'""') + '"';
       var nombreEsc = '"' + r.nombre.replace(/"/g,'""') + '"';
-      return [r.folio, r.programa, r.categoria, r.prioridad, r.fecha, r.anonimo ? 'Sí':'No', nombreEsc, mensajeEsc].join(',');
+      return [r.folio, r.programa, r.semestre, r.categoria, r.prioridad, r.fecha, r.anonimo ? 'Sí':'No', nombreEsc, mensajeEsc].join(',');
     }).join('\n');
     descargar('buzon-cuc-escucha.csv', header + rows, 'text/csv;charset=utf-8;');
   });
